@@ -1,0 +1,30 @@
+.homepage {
+    padding: 20px;
+  }
+  
+  .post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .post-form input,
+  .post-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .posts {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .post {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+    background: #f9f9f9;
+  }
