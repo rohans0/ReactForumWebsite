@@ -1,30 +1,182 @@
+/* General Styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #343a40;
+  margin: 0;
+  padding: 0;
+}
+
+/* Main Container */
 .homepage {
-    padding: 20px;
-  }
-  
-  .post-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .post-form input,
-  .post-form textarea {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .posts {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .post {
-    border: 1px solid #ccc;
-    padding: 15px;
-    border-radius: 5px;
-    background: #f9f9f9;
-  }
+  width: 60%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Form Styling */
+.post-form {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.post-form input,
+.post-form textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.post-form button {
+  background-color: #313436;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.post-form button:hover {
+  background-color: #3f4041;
+}
+
+/* Post List */
+.posts {
+  list-style: none;
+  padding: 0;
+}
+
+.post {
+  background-color: #fff;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.post h2 {
+  margin-top: 0;
+}
+
+.post img {
+  display: block;
+  margin: 10px 0;
+  max-width: 100%;
+  height: auto;
+}
+
+.post .comments-count {
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* Post Actions (Likes & Comment Counter) */
+.post-actions {
+  display: flex;
+  align-items: center; 
+  justify-content: flex-start; 
+  gap: 15px; 
+  margin-top: 10px;
+}
+
+.post-actions button {
+  background-color: #232724;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.post-actions button:hover {
+  background-color: #218838;
+}
+
+/* Comments Counter Icon */
+.comment-counter {
+  display: inline-flex;
+  align-items: center;
+  background-color: #343a40;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.comment-counter:hover {
+  background-color: #495057;
+}
+
+.comment-counter svg {
+  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+  fill: #fff;
+}
+
+/* Replies */
+.reply-form textarea {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.reply-form button {
+  background-color: #000000;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.reply-form button:hover {
+  background-color: #222222;
+}
+
+.replies {
+  margin-left: 20px;
+  border-left: 2px solid #ddd;
+  padding-left: 10px;
+}
+
+.reply {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.reply p {
+  margin: 0;
+}
+
+.reply button {
+  background-color: #1f1f1f;
+  color: #fff;
+  padding: 3px 7px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.reply button:hover {
+  background-color: #303030;
+}
