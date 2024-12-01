@@ -3,7 +3,7 @@ import "../styles/Homepage.css";
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", content: "" , file: "" });
+  const [newPost, setNewPost] = useState({ title: "", content: "", file: "" });
   const [newReply, setNewReply] = useState([]);
   const [newFile, setNewFile] = useState();
 
@@ -21,25 +21,23 @@ const HomePage = () => {
   /* pID = ID of parent post */
   const handleReplyChange = (pID, e) => {
     const content = e.target.value;
-    /* Modeled after handleInputChange */
-    /* Setting the 'name' as the post_ID helps with connecting reply and post */
-    setNewReply((prev) => ({...prev, [pID]: content}));
+    setNewReply((prev) => ({ ...prev, [pID]: content }));
   };
 
   const handlePostSubmit = (e) => {
     e.preventDefault();
     if (newPost.title && newPost.content) {
-        const post = {
-          id: Date.now(),
-          title: newPost.title,
-          content: newPost.content,
-          likes: 0,
-          file: newFile || "",
-          replies: []
-        };
-        setPosts((prev) => [post, ...prev]);
-        setNewPost({ title: "", content: "", file: "" });
-        setNewFile(null);
+      const post = {
+        id: Date.now(),
+        title: newPost.title,
+        content: newPost.content,
+        likes: 0,
+        file: newFile || "",
+        replies: [],
+      };
+      setPosts((prev) => [post, ...prev]);
+      setNewPost({ title: "", content: "", file: "" });
+      setNewFile(null);
     }
   };
 
@@ -49,25 +47,16 @@ const HomePage = () => {
       const reply = {
         id: Date.now(),
         content: newReply[pID],
-        likes: 0
+        likes: 0,
       };
-      
-      setPosts((prev) => {
-        return prev.map((post) => {
-          if (post.id === pID) {
-            return {...post, replies: [...post.replies, reply]}
-          } else {
-            return post;
-          }
-        })
-      })
 
-      // setPosts((prev) => {
-      //   prev.map((post) =>
-          
-      //     //post.id === pID ? {...post, replies: [...post.replies, reply]} : post
-      //   }) 
-      // });
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === pID
+            ? { ...post, replies: [...post.replies, reply] }
+            : post
+        )
+      );
 
       setNewReply((prev) => ({ ...prev, [pID]: "" }));
     }
@@ -76,19 +65,17 @@ const HomePage = () => {
   const handleLike = (id) => {
     setPosts((prev) =>
       prev.map((post) =>
-        post.id === id ? { ...post, likes: post.likes + 1} : post
-      ),
-      handleLikeChange()
-    )
+        post.id === id ? { ...post, likes: post.likes + 1 } : post
+      )
+    );
+    handleLikeChange();
   };
 
   const handleLikeChange = () => {
     posts.sort((a, b) => b.likes - a.likes);
   };
 
-  /* BIG NOTE: For some reason when you click like for a reply
-    handleReplyLike activates twice. idk how to really fix rn, but
-    this is a current solution */
+  /* Handle likes for replies */
   const handleReplyLike = (pID, rID) => {
     setPosts((prev) => {
       const arrayOfPosts = [...prev];
@@ -106,7 +93,7 @@ const HomePage = () => {
       }
       return arrayOfPosts;
     });
-  }
+  };
 
   return (
     <div className="homepage">
@@ -129,7 +116,7 @@ const HomePage = () => {
           onChange={handleInputChange}
           required
         />
-        <input type="file" name="file-upload" onChange={handleFileUpload}></input>
+        <input type="file" name="file-upload" onChange={handleFileUpload} />
         <button type="submit">Create Post</button>
       </form>
 
@@ -139,18 +126,34 @@ const HomePage = () => {
           <div key={post.id} className="post">
             <h2>{post.title}</h2>
             <p>{post.content}</p>
-            {/* Figure out how to dynamically edit width and height */}
-            <img src={post.file} alt="" width="500px" height="500px"></img>
+            {post.file && (
+              <img
+                src={post.file}
+                alt="Post Attachment"
+                style={{ width: "500px", height: "500px" }}
+              />
+            )}
             <button onClick={() => handleLike(post.id)}>Likes ({post.likes})</button>
-            <form onSubmit={(e) => handleReplySubmit(post.id, e)} className="reply-form">
-              <textarea name="reply-content" placeholder="Write your Reply..." value={newReply[post.id] || ""} onChange={(e) => handleReplyChange(post.id, e)} required></textarea>
+            <form
+              onSubmit={(e) => handleReplySubmit(post.id, e)}
+              className="reply-form"
+            >
+              <textarea
+                name="reply-content"
+                placeholder="Write your Reply..."
+                value={newReply[post.id] || ""}
+                onChange={(e) => handleReplyChange(post.id, e)}
+                required
+              ></textarea>
               <button type="submit">Create Reply</button>
             </form>
             <div className="replies">
-              {post.replies.map((reply) => ( 
+              {post.replies.map((reply) => (
                 <div key={reply.id} className="reply">
                   <p>{reply.content}</p>
-                  <button onClick={() => handleReplyLike(post.id, reply.id)}>Like ({reply.likes})</button>
+                  <button onClick={() => handleReplyLike(post.id, reply.id)}>
+                    Like ({reply.likes})
+                  </button>
                 </div>
               ))}
             </div>
