@@ -95,6 +95,16 @@ const HomePage = () => {
     });
   };
 
+  const countComments = (replies) => {
+    let count = replies.length;
+    replies.forEach((reply) => {
+      if (reply.replies) {
+        count += countComments(reply.replies);
+      }
+    });
+    return count;
+  };  
+
   return (
     <div className="homepage">
       <h1>Home</h1>
@@ -130,10 +140,28 @@ const HomePage = () => {
               <img
                 src={post.file}
                 alt="Post Attachment"
-                style={{ width: "500px", height: "500px" }}
+                style={{ width: "100%", maxHeight: "400px", objectFit: "contain" }}
               />
             )}
-            <button onClick={() => handleLike(post.id)}>Likes ({post.likes})</button>
+            <div className="post-actions">
+              <button onClick={() => handleLike(post.id)}>
+                👍 Likes ({post.likes})
+              </button>
+              <a
+                href={`#post-${post.id}-comments`}
+                className="comment-counter"
+                title="View Comments"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M20 2H4a2 2 0 00-2 2v16l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm0 12H6.83L4 16.83V4h16v10z" />
+                </svg>
+                {countComments(post.replies)}
+              </a>
+            </div>
             <form
               onSubmit={(e) => handleReplySubmit(post.id, e)}
               className="reply-form"
@@ -145,7 +173,7 @@ const HomePage = () => {
                 onChange={(e) => handleReplyChange(post.id, e)}
                 required
               ></textarea>
-              <button type="submit">Create Reply</button>
+              <button type="submit">Reply</button>
             </form>
             <div className="replies">
               {post.replies.map((reply) => (
