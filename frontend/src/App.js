@@ -4,6 +4,7 @@ import HomePage from "./pages/Homepage";
 import AuthPage from "./pages/AuthPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import AuthProfile from "./components/authProfile";
 import "./styles/globals.css";
 
 const App = () => {

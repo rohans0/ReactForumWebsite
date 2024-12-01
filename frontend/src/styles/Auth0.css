@@ -1,0 +1,12 @@
+#info {
+	display: inline-block;
+  padding: 10px 20px;
+}
+#info>* {
+	display: block;
+}
+
+#pfp {
+	width: 50px;
+	display: inline;
+}

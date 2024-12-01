@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import AuthProfile from "./authProfile";
+
 import "../styles/Header.css";
 
 const Header = () => {
@@ -10,11 +12,12 @@ const Header = () => {
           <li>
             <Link to="/">Home</Link>
           </li>
-          <li>
+					{/*<li>
             <Link to="/auth">Login</Link>
-          </li>
+          </li>*/}
         </ul>
       </nav>
+			<AuthProfile />
     </header>
   );
 };
