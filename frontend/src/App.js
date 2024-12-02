@@ -4,6 +4,8 @@ import HomePage from "./pages/Homepage";
 import AuthPage from "./pages/AuthPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { Post } from "./pages/Post.js";
+import { UnknownPage } from "./pages/UnknownPage.js";
 import "./styles/globals.css";
 
 const App = () => {
@@ -16,6 +18,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/thread/:id" element={<Post />} />
+            <Route path="*" element={<UnknownPage />} />
           </Routes>
         </main>
         <Footer />
