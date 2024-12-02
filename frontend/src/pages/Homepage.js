@@ -114,6 +114,7 @@ const HomePage = () => {
 
       {/* Post Creation Form */}
       <form onSubmit={handlePostSubmit} className="post-form">
+				<h6>{user ? user.name : "Anon"}</h6>
         <input
           type="text"
           name="title"
@@ -137,8 +138,8 @@ const HomePage = () => {
       <div className="posts">
         {posts.map((post) => (
           <div key={post.id} className="post">
+            <h6>{post.author}</h6>
             <h2>{post.title}</h2>
-            <h6>author: {post.author}</h6>
             <p>{post.content}</p>
             {post.file && (
               <img

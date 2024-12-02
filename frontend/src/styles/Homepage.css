@@ -23,6 +23,10 @@ body {
   margin-bottom: 20px;
 }
 
+.post-form h6 {
+	margin: 0;
+}
+
 .post-form input,
 .post-form textarea {
   width: 100%;
@@ -61,6 +65,10 @@ body {
 
 .post h2 {
   margin-top: 0;
+}
+
+.post h6 {
+	margin: 0;
 }
 
 .post img {
