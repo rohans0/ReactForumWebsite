@@ -1,11 +1,13 @@
 import React, { useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", content: "", file: "" });
+  const [newPost, setNewPost] = useState({ title: "", author: "", content: "", file: "" });
   const [newReply, setNewReply] = useState([]);
   const [newFile, setNewFile] = useState();
+	const { user } = useAuth0();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,13 +32,14 @@ const HomePage = () => {
       const post = {
         id: Date.now(),
         title: newPost.title,
+				author: user ? user.name : "Anon",
         content: newPost.content,
         likes: 0,
         file: newFile || "",
         replies: [],
       };
       setPosts((prev) => [post, ...prev]);
-      setNewPost({ title: "", content: "", file: "" });
+      setNewPost({ title: "", author: "", content: "", file: "" });
       setNewFile(null);
     }
   };
@@ -135,6 +138,7 @@ const HomePage = () => {
         {posts.map((post) => (
           <div key={post.id} className="post">
             <h2>{post.title}</h2>
+            <h6>author: {post.author}</h6>
             <p>{post.content}</p>
             {post.file && (
               <img
