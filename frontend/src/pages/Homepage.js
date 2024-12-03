@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", content: "", file: "" });
+  const [newPost, setNewPost] = useState({ title: "", author: "", content: "", file: "" });
   const [newReply, setNewReply] = useState([]);
   const [newFile, setNewFile] = useState();
+	const { user } = useAuth0();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,13 +35,14 @@ const HomePage = () => {
       const post = {
         id: Date.now(),
         title: newPost.title,
+				author: user ? user.name : "Anon",
         content: newPost.content,
         likes: 0,
         file: newFile || "",
-        replies: []
+        replies: [],
       };
       setPosts((prev) => [post, ...prev]);
-      setNewPost({ title: "", content: "", file: "" });
+      setNewPost({ title: "", author: "", content: "", file: "" });
       setNewFile(null);
       document.getElementById("test").value = null; /* we need to edit this */
     }
@@ -51,7 +54,7 @@ const HomePage = () => {
       const reply = {
         id: Date.now(),
         content: newReply[pID],
-        likes: 0
+        likes: 0,
       };
 
       setPosts((prev) => {
@@ -64,6 +67,14 @@ const HomePage = () => {
         })
       })
 
+//       setPosts((prev) =>
+//         prev.map((post) =>
+//           post.id === pID
+//             ? { ...post, replies: [...post.replies, reply] }
+//             : post
+//         )
+//       );
+
       setNewReply((prev) => ({ ...prev, [pID]: "" }));
     }
   };
@@ -75,7 +86,7 @@ const HomePage = () => {
       )
     )
   };
-
+  
   const handleReplyLike = (pID, rID) => {
     setPosts((prev) => {
       const arrayOfPosts = [...prev];
@@ -93,7 +104,17 @@ const HomePage = () => {
       }
       return arrayOfPosts;
     });
-  }
+  };
+
+  const countComments = (replies) => {
+    let count = replies.length;
+    replies.forEach((reply) => {
+      if (reply.replies) {
+        count += countComments(reply.replies);
+      }
+    });
+    return count;
+  };  
 
   return (
     <div className="homepage">
@@ -101,6 +122,7 @@ const HomePage = () => {
 
       {/* Post Creation Form */}
       <form onSubmit={handlePostSubmit} className="post-form">
+				<h6>{user ? user.name : "Anon"}</h6>
         <input
           type="text"
           name="title"
@@ -127,20 +149,55 @@ const HomePage = () => {
             <nav>
               <Link to={`/thread/${post.id}`} state={post}>{post.title}</Link>
             </nav>
+            <h6>{post.author}</h6>
             <h2>{post.title}</h2>
             <p>{post.content}</p>
-            {/* Figure out how to dynamically edit width and height */}
-            {post.file !== "" ? <img src={post.file || ""} alt="" width="500px" height="500px"></img> : <></>}
-            <button onClick={() => handleLike(post.id)}>Likes ({post.likes})</button>
-            <form onSubmit={(e) => handleReplySubmit(post.id, e)} className="reply-form">
-              <textarea name="reply-content" placeholder="Write your Reply..." value={newReply[post.id] || ""} onChange={(e) => handleReplyChange(post.id, e)} required></textarea>
-              <button type="submit">Create Reply</button>
+            {post.file && (
+              <img
+                src={post.file}
+                alt="Post Attachment"
+                style={{ width: "100%", maxHeight: "400px", objectFit: "contain" }}
+              />
+            )}
+            <div className="post-actions">
+              <button onClick={() => handleLike(post.id)}>
+                👍 Likes ({post.likes})
+              </button>
+              <a
+                href={`#post-${post.id}-comments`}
+                className="comment-counter"
+                title="View Comments"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M20 2H4a2 2 0 00-2 2v16l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm0 12H6.83L4 16.83V4h16v10z" />
+                </svg>
+                {countComments(post.replies)}
+              </a>
+            </div>
+            <form
+              onSubmit={(e) => handleReplySubmit(post.id, e)}
+              className="reply-form"
+            >
+              <textarea
+                name="reply-content"
+                placeholder="Write your Reply..."
+                value={newReply[post.id] || ""}
+                onChange={(e) => handleReplyChange(post.id, e)}
+                required
+              ></textarea>
+              <button type="submit">Reply</button>
             </form>
             <div className="replies">
               {post.replies.map((reply) => (
                 <div key={reply.id} className="reply">
                   <p>{reply.content}</p>
-                  <button onClick={() => handleReplyLike(post.id, reply.id)}>Like ({reply.likes})</button>
+                  <button onClick={() => handleReplyLike(post.id, reply.id)}>
+                    Like ({reply.likes})
+                  </button>
                 </div>
               ))}
             </div>
