@@ -60,11 +60,12 @@ const HomePage = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            ThreadID: Date.now(),
             U_UserID: user?.sub || "anon", // Use user ID from Auth0 or "anon" for anonymous posts
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0, // Initialize likes to 0
-            ImageContent: newFile || null, // Attach file if present
+            ImageContent: newFile || "", // Attach file if present
           }),
         });
         const createdPost = await response.json(); // Response from the server with the created post

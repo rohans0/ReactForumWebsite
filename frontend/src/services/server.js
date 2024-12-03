@@ -40,13 +40,13 @@ app.get('/api/threads', (req, res) => {
 
 // Create a new thread
 app.post('/api/threads', (req, res) => {
-  const { U_UserID, Title, TextContent, Likes = 0 } = req.body;
-  const query = `INSERT INTO Thread (U_UserID, Title, DateCreated, Likes, TextContent) VALUES (?, ?, CURDATE(), ?, ?)`;
-  db.query(query, [U_UserID, Title, Likes, TextContent], (err, result) => {
+  const {U_UserID, Title, ImageContent, TextContent, Likes = 0 } = req.body;
+  const query = `INSERT INTO Thread (ThreadID, U_UserID, Title, DateCreated, Likes, TextContent, ImageContent) VALUES (?, ?, ?, CURDATE(), ?, ?, ?)`;
+  db.query(query, [ThreadID, U_UserID, Title, Likes, TextContent, ImageContent], (err, result) => {
     if (err) {
       return res.status(500).send(err);
     }
-    res.json({ ThreadID: result.insertId, U_UserID, Title, Likes, TextContent });
+    res.json({ ThreadID: result.insertId, U_UserID, Title, Likes, TextContent, ImageContent });
   });
 });
 
