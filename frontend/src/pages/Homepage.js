@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
 
@@ -23,6 +24,8 @@ const HomePage = () => {
   /* pID = ID of parent post */
   const handleReplyChange = (pID, e) => {
     const content = e.target.value;
+    /* Modeled after handleInputChange */
+    /* Setting the 'name' as the post_ID helps with connecting reply and post */
     setNewReply((prev) => ({ ...prev, [pID]: content }));
   };
 
@@ -41,6 +44,7 @@ const HomePage = () => {
       setPosts((prev) => [post, ...prev]);
       setNewPost({ title: "", author: "", content: "", file: "" });
       setNewFile(null);
+      document.getElementById("test").value = null; /* we need to edit this */
     }
   };
 
@@ -53,13 +57,23 @@ const HomePage = () => {
         likes: 0,
       };
 
-      setPosts((prev) =>
-        prev.map((post) =>
-          post.id === pID
-            ? { ...post, replies: [...post.replies, reply] }
-            : post
-        )
-      );
+      setPosts((prev) => {
+        return prev.map((post) => {
+          if (post.id === pID) {
+            return { ...post, replies: [...post.replies, reply] }
+          } else {
+            return post;
+          }
+        })
+      })
+
+//       setPosts((prev) =>
+//         prev.map((post) =>
+//           post.id === pID
+//             ? { ...post, replies: [...post.replies, reply] }
+//             : post
+//         )
+//       );
 
       setNewReply((prev) => ({ ...prev, [pID]: "" }));
     }
@@ -70,15 +84,9 @@ const HomePage = () => {
       prev.map((post) =>
         post.id === id ? { ...post, likes: post.likes + 1 } : post
       )
-    );
-    handleLikeChange();
+    )
   };
-
-  const handleLikeChange = () => {
-    posts.sort((a, b) => b.likes - a.likes);
-  };
-
-  /* Handle likes for replies */
+  
   const handleReplyLike = (pID, rID) => {
     setPosts((prev) => {
       const arrayOfPosts = [...prev];
@@ -89,7 +97,7 @@ const HomePage = () => {
           for (let j = 0; j < arrayOfReplies.length; j++) {
             const reply = arrayOfReplies[j];
             if (reply.id === rID) {
-              reply.likes = reply.likes + 0.5;
+              reply.likes = reply.likes + 1;
             }
           }
         }
@@ -130,14 +138,17 @@ const HomePage = () => {
           onChange={handleInputChange}
           required
         />
-        <input type="file" name="file-upload" onChange={handleFileUpload} />
+        <input type="file" name="file-upload" id="test" onChange={handleFileUpload}></input>
         <button type="submit">Create Post</button>
       </form>
 
       {/* Post List */}
       <div className="posts">
-        {posts.map((post) => (
+        {posts.sort((a, b) => b.likes - a.likes).map((post) => (
           <div key={post.id} className="post">
+            <nav>
+              <Link to={`/thread/${post.id}`} state={post}>{post.title}</Link>
+            </nav>
             <h6>{post.author}</h6>
             <h2>{post.title}</h2>
             <p>{post.content}</p>
