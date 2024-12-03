@@ -168,6 +168,59 @@ app.get('/api/thread/:Title', (req, res) => {
   });
 });
 
+// Endpoint: Get thread by ID (along with associated replies)
+app.get('/api/threads/:threadID', (req, res) => {
+  const { threadID } = req.params;
+  const query = `
+    SELECT 
+      t.ThreadID, 
+      t.U_UserID AS ThreadOwnerID, 
+      u.Username AS ThreadOwner, 
+      t.Title, 
+      t.DateCreated, 
+      t.Likes, 
+      t.TextContent, 
+      t.ImageContent, 
+      t.VideoContent,
+      IFNULL(
+        JSON_ARRAYAGG(
+          CASE 
+            WHEN p.PostID IS NOT NULL THEN JSON_OBJECT(
+              'PostID', p.PostID,
+              'T_ThreadID', p.T_ThreadID,
+              'U_UserID', p.U_UserID,
+              'Username', pu.Username,
+              'TextContent', p.TextContent,
+              'Likes', p.Likes,
+              'DatePosted', p.DatePosted,
+              'ImageContent', p.ImageContent,
+              'VideoContent', p.VideoContent
+            ) 
+            ELSE NULL 
+          END
+        ),
+        JSON_ARRAY()
+      ) AS Replies
+    FROM Thread t
+    LEFT JOIN Post p ON t.ThreadID = p.T_ThreadID
+    LEFT JOIN User u ON t.U_UserID = u.UserID
+    LEFT JOIN User pu ON p.U_UserID = pu.UserID
+    WHERE t.ThreadID = ?
+    GROUP BY t.ThreadID;
+  `;
+  db.query(query, [threadID], (err, result) => {
+    if (err) {
+      return res.status(500).send(err); // Handle query errors
+    }
+    if (result.length === 0) {
+      return res.status(404).send('Thread not found'); // Handle case when thread is not found
+    }
+    // Filter out null replies and send the response
+    res.json(result[0]);
+  });
+});
+
+
 // Start the server on port 5000
 app.listen(5000, () => {
   console.log('Server is running on port 5000');
