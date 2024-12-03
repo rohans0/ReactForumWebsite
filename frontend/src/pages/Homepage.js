@@ -269,7 +269,7 @@ const HomePage = () => {
                 <button type="submit">Reply</button>
               </form>
               <div className="replies">
-                {post.replies.map((reply) => (
+                {(post.replies || []).map((reply) => (
                   <div key={reply.PostID} className="reply">
                     <p>{reply.TextContent}</p>
                     <button onClick={() => handleReplyLike(post.ThreadID, reply.PostID)}>
