@@ -3,94 +3,89 @@ import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
 
-// Backend API URL for your server
-const API_BASE_URL = "http://localhost:5000/api"; // Update with your backend URL if different
+// Base URL for API endpoints
+const API_BASE_URL = "http://localhost:5000/api";
 
 const HomePage = () => {
-  // State hooks to manage posts, new post data, file upload, and replies
-  const [posts, setPosts] = useState([]); // Holds the posts fetched from the backend
-  const [newPost, setNewPost] = useState({ title: "", content: "" }); // New post form data
-  const [newFile, setNewFile] = useState(null); // Holds the file URL if a file is uploaded
-  const { user } = useAuth0(); // Auth0 user object for authentication
-  const [newReply, setNewReply] = useState({}); // Holds the new reply content for each post
+  // State to hold the list of posts (threads)
+  const [posts, setPosts] = useState([]);
+  // State for new post inputs (title and content)
+  const [newPost, setNewPost] = useState({ title: "", content: "" });
+  // State for handling uploaded files for posts
+  const [newFile, setNewFile] = useState(null);
+  // User info from Auth0 for identifying the poster
+  const { user } = useAuth0();
+  // State to manage new replies keyed by thread ID
+  const [newReply, setNewReply] = useState({});
 
-  // `useEffect` hook to load posts when the component is mounted
+  // Fetch all threads with replies when the component loads
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        // Fetch the threads (posts) from the backend
+        // Fetch all threads from the API
         const response = await fetch(`${API_BASE_URL}/threads`);
         const data = await response.json();
-
-        // Ensure that each post has a `replies` array, even if it's empty
+        // Ensure replies are always an array, even if there are none
         const postsWithReplies = data.map((post) => ({
           ...post,
-          replies: Array.isArray(post.replies) ? post.replies : [],
+          replies: Array.isArray(post.Replies) ? post.Replies : [],
         }));
-
-        setPosts(postsWithReplies); // Set the fetched posts with their replies
+        setPosts(postsWithReplies); // Update state with fetched posts
       } catch (error) {
-        console.error("Error fetching threads:", error); // Error handling if fetching fails
+        console.error("Error fetching threads:", error); // Log errors
       }
     };
+    loadPosts(); // Trigger the fetch function
+  }, []);
 
-    loadPosts(); // Trigger the loading of posts
-  }, []); // Empty array means this runs only once when the component mounts
-
-  // Handles the change in the new post form (title/content)
+  // Handle input changes for the new post form
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewPost((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = e.target; // Get input name and value
+    setNewPost((prev) => ({ ...prev, [name]: value })); // Update state
   };
 
-  // Handles file upload (if a file is attached to the post)
+  // Handle file upload and create a preview URL
   const handleFileUpload = (e) => {
     if (e.target.files.length > 0) {
-      setNewFile(URL.createObjectURL(e.target.files[0])); // Converts the file to a local URL
+      setNewFile(URL.createObjectURL(e.target.files[0])); // Generate a URL for the uploaded file
     }
   };
 
-  // Submits a new post to the backend
+  // Handle new post submission
   const handlePostSubmit = async (e) => {
-    e.preventDefault(); // Prevents default form submission
+    e.preventDefault(); // Prevent page reload
     if (newPost.title && newPost.content) {
       try {
-        // Sending the new post data to the backend via a POST request
         const response = await fetch(`${API_BASE_URL}/threads`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ThreadID: Date.now(),
-            U_UserID: user?.sub || "anon", // Use user ID from Auth0 or "anon" for anonymous posts
+            ThreadID: Date.now(), // Temporary unique ID for thread
+            U_UserID: user?.sub || "anon", // User ID or anonymous
             Title: newPost.title,
             TextContent: newPost.content,
-            Likes: 0, // Initialize likes to 0
-            ImageContent: newFile || "", // Attach file if present
+            Likes: 0, // Initialize likes at 0
+            ImageContent: newFile || "", // Include uploaded file if any
           }),
         });
-        const createdPost = await response.json(); // Response from the server with the created post
-
-        // Update the posts state with the newly created post
-        setPosts((prev) => [createdPost, ...prev]);
-
-        // Clear the form data after post submission
-        setNewPost({ title: "", content: "" });
-        setNewFile(null);
-        document.getElementById("file-upload").value = null; // Reset the file input
+        const createdPost = await response.json();
+        setPosts((prev) => [createdPost, ...prev]); // Add new post to the top of the list
+        setNewPost({ title: "", content: "" }); // Reset form fields
+        setNewFile(null); // Clear uploaded file
+        document.getElementById("file-upload").value = null; // Reset file input
       } catch (error) {
-        console.error("Error creating post:", error); // Error handling if creating the post fails
+        console.error("Error creating post:", error); // Log errors
       }
     }
   };
 
-  // Increments the like count for a specific post
+  // Handle liking a thread
   const handleLike = async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/threads/${id}/like`, {
-        method: "PATCH", // PATCH request to update the like count
+        method: "PATCH",
       });
       if (response.ok) {
-        // Update the posts state with the new like count
         setPosts((prev) =>
           prev.map((post) =>
             post.ThreadID === id ? { ...post, Likes: post.Likes + 1 } : post
@@ -98,41 +93,33 @@ const HomePage = () => {
         );
       }
     } catch (error) {
-      console.error("Error liking thread:", error); // Error handling if liking the post fails
+      console.error("Error liking thread:", error);
     }
   };
 
-  // Handles change in reply input for a specific post
+  // Handle reply content change for a specific thread
   const handleReplyChange = (pID, e) => {
-    const { value } = e.target;
-    setNewReply((prev) => ({ ...prev, [pID]: value })); // Store reply content by post ID
+    const { value } = e.target; // Get reply content
+    setNewReply((prev) => ({ ...prev, [pID]: value })); // Update reply state by thread ID
   };
 
-  // Submits a new reply for a specific post
+  // Handle reply submission for a specific thread
   const handleReplySubmit = async (pID, e) => {
     e.preventDefault();
-    const replyContent = newReply[pID]; // Get the reply content for the specific post
+    const replyContent = newReply[pID]; // Get reply content from state
     if (replyContent) {
-      const reply = {
-        content: replyContent,
-        likes: 0, // Initialize likes for the reply
-      };
-
       try {
-        // Sending the new reply to the backend via a POST request
         const response = await fetch(`${API_BASE_URL}/posts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            T_ThreadID: pID, // Thread ID to associate the reply with the post
-            U_UserID: user?.sub || "anon", // Use user ID or "anon" for anonymous replies
-            TextContent: reply.content,
-            Likes: 0, // Initialize likes for the reply
+            T_ThreadID: pID,
+            U_UserID: user?.sub || "anon",
+            TextContent: replyContent,
+            Likes: 0, // Initialize likes at 0
           }),
         });
-        const createdReply = await response.json(); // Get the newly created reply
-
-        // Add the new reply to the post's replies array
+        const createdReply = await response.json();
         setPosts((prev) =>
           prev.map((post) =>
             post.ThreadID === pID
@@ -140,23 +127,20 @@ const HomePage = () => {
               : post
           )
         );
-
-        // Clear the reply input after submission
-        setNewReply((prev) => ({ ...prev, [pID]: "" }));
+        setNewReply((prev) => ({ ...prev, [pID]: "" })); // Clear reply input
       } catch (error) {
-        console.error("Error submitting reply:", error); // Error handling if replying fails
+        console.error("Error submitting reply:", error);
       }
     }
   };
 
-  // Increments the like count for a specific reply
+  // Handle liking a reply within a specific thread
   const handleReplyLike = async (pID, rID) => {
     try {
       const response = await fetch(`${API_BASE_URL}/posts/${rID}/like`, {
-        method: "PATCH", // PATCH request to update the reply's like count
+        method: "PATCH",
       });
       if (response.ok) {
-        // Update the posts state with the new like count for the specific reply
         setPosts((prev) =>
           prev.map((post) =>
             post.ThreadID === pID
@@ -173,20 +157,19 @@ const HomePage = () => {
         );
       }
     } catch (error) {
-      console.error("Error liking reply:", error); // Error handling if liking the reply fails
+      console.error("Error liking reply:", error);
     }
   };
 
-  // Helper function to count the number of replies for a post
+  // Count the number of replies for a thread
   const countComments = (replies) => {
-    return Array.isArray(replies) ? replies.length : 0; // Return the number of replies
+    return Array.isArray(replies) ? replies.length : 0;
   };
 
   return (
     <div className="homepage">
       <h1>Home</h1>
-
-      {/* Post Creation Form */}
+      {/* Form to create a new post */}
       <form onSubmit={handlePostSubmit} className="post-form">
         <h6>{user ? user.name : "Anon"}</h6>
         <input
@@ -213,12 +196,13 @@ const HomePage = () => {
         <button type="submit">Create Post</button>
       </form>
 
-      {/* Post List */}
+      {/* List of posts */}
       <div className="posts">
         {posts
-          .sort((a, b) => b.Likes - a.Likes) // Sorting posts by likes in descending order
+          .sort((a, b) => b.Likes - a.Likes) // Sort posts by likes
           .map((post) => (
             <div key={post.ThreadID} className="post">
+              {/* Thread title and link */}
               <nav>
                 <Link to={`/thread/${post.ThreadID}`} state={post}>
                   {post.Title}
@@ -256,6 +240,7 @@ const HomePage = () => {
                   {countComments(post.replies)}
                 </a>
               </div>
+              {/* Form to reply to the post */}
               <form
                 onSubmit={(e) => handleReplySubmit(post.ThreadID, e)}
                 className="reply-form"
@@ -269,15 +254,22 @@ const HomePage = () => {
                 ></textarea>
                 <button type="submit">Reply</button>
               </form>
+              {/* Replies section */}
               <div className="replies">
-                {(post.replies || []).map((reply) => (
-                  <div key={reply.PostID} className="reply">
-                    <p>{reply.TextContent}</p>
-                    <button onClick={() => handleReplyLike(post.ThreadID, reply.PostID)}>
-                      Like ({reply.Likes})
-                    </button>
-                  </div>
-                ))}
+                {post.replies && post.replies.length > 0 ? (
+                  post.replies.map((reply) => (
+                    <div key={reply.PostID} className="reply">
+                      <p>{reply.TextContent}</p>
+                      <button
+                        onClick={() => handleReplyLike(post.ThreadID, reply.PostID)}
+                      >
+                        Like ({reply.Likes})
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p>No replies yet.</p>
+                )}
               </div>
             </div>
           ))}

@@ -1,142 +1,174 @@
-// import mysql from 'mysql2';
-// import express from 'express';
-// import bodyParser from 'body-parser';
-// import cors from 'cors';
+// Import required modules for server setup
+const mysql = require('mysql2'); // MySQL client for Node.js
+const express = require('express'); // Framework for building web applications
+const bodyParser = require('body-parser'); // Middleware for parsing JSON request bodies
+const cors = require('cors'); // Middleware for enabling Cross-Origin Resource Sharing (CORS)
 
-const mysql = require('mysql2');
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
+// Initialize Express app
 const app = express();
-app.use(bodyParser.json());
-app.use(cors()); 
+app.use(bodyParser.json()); // Parse incoming JSON requests
+app.use(cors()); // Enable CORS for all routes
 
-// Database connection pool
+// Create MySQL database connection
 const db = mysql.createConnection({
-  host: 'awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com',
-  user: 'forumAdmin',
-  password: 'forumPass437--',
-  database: 'forum_database'
+  host: 'awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com', // Database host
+  user: 'forumAdmin', // Database username
+  password: 'forumPass437--', // Database password
+  database: 'forum_database' // Database name
 });
 
+// Connect to the database and handle errors
 db.connect((err) => {
   if (err) {
-    throw err;
+    throw err; // Throw error if connection fails
   }
-  console.log('Connected to database');
+  console.log('Connected to database'); // Log successful connection
 });
 
-// Get all threads
+// Endpoint: Retrieve all threads with associated replies
 app.get('/api/threads', (req, res) => {
-  const query = 'SELECT * FROM Thread';
+  const query = `
+    SELECT 
+      t.ThreadID, 
+      t.U_UserID AS ThreadOwnerID, 
+      u.Username AS ThreadOwner, 
+      t.Title, 
+      t.DateCreated, 
+      t.Likes, 
+      t.TextContent, 
+      t.ImageContent, 
+      t.VideoContent,
+      IFNULL(
+        JSON_ARRAYAGG(
+          CASE 
+            WHEN p.PostID IS NOT NULL THEN JSON_OBJECT(
+              'PostID', p.PostID,
+              'T_ThreadID', p.T_ThreadID,
+              'U_UserID', p.U_UserID,
+              'Username', pu.Username,
+              'TextContent', p.TextContent,
+              'Likes', p.Likes,
+              'DatePosted', p.DatePosted,
+              'ImageContent', p.ImageContent,
+              'VideoContent', p.VideoContent
+            ) 
+            ELSE NULL 
+          END
+        ),
+        JSON_ARRAY()
+      ) AS Replies
+    FROM Thread t
+    LEFT JOIN Post p ON t.ThreadID = p.T_ThreadID
+    LEFT JOIN User u ON t.U_UserID = u.UserID
+    LEFT JOIN User pu ON p.U_UserID = pu.UserID
+    GROUP BY t.ThreadID;
+  `;
+  // Execute the query and handle the response
   db.query(query, (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle query errors
     }
-    res.json(result);
+    // Filter out null replies and send the response
+    res.json(result.map(thread => ({ ...thread, Replies: thread.Replies.filter(r => r !== null) })));
   });
 });
 
-// Create a new thread
+// Endpoint: Create a new thread
 app.post('/api/threads', (req, res) => {
-  const {U_UserID, Title, ImageContent, TextContent, Likes = 0 } = req.body;
+  const { U_UserID, Title, ImageContent, TextContent, Likes = 0 } = req.body;
   const query = `INSERT INTO Thread (ThreadID, U_UserID, Title, DateCreated, Likes, TextContent, ImageContent) VALUES (?, ?, ?, CURDATE(), ?, ?, ?)`;
-  db.query(query, [ThreadID, U_UserID, Title, Likes, TextContent, ImageContent], (err, result) => {
+  db.query(query, [null, U_UserID, Title, Likes, TextContent, ImageContent], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle errors during insertion
     }
+    // Respond with the created thread details
     res.json({ ThreadID: result.insertId, U_UserID, Title, Likes, TextContent, ImageContent });
   });
 });
 
-// Get all posts for a thread
+// Endpoint: Get all posts for a specific thread
 app.get('/api/threads/:threadID/posts', (req, res) => {
   const { threadID } = req.params;
   const query = 'SELECT * FROM Post WHERE T_ThreadID = ?';
   db.query(query, [threadID], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle query errors
     }
-    res.json(result);
+    res.json(result); // Return the posts
   });
 });
 
-// Create a new post
+// Endpoint: Create a new post in a thread
 app.post('/api/posts', (req, res) => {
   const { T_ThreadID, U_UserID, TextContent, Likes = 0 } = req.body;
   const query = `INSERT INTO Post (T_ThreadID, U_UserID, Likes, DatePosted, TextContent) VALUES (?, ?, ?, CURDATE(), ?)`;
   db.query(query, [T_ThreadID, U_UserID, Likes, TextContent], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle errors during insertion
     }
-    res.json({ PostID: result.insertId, T_ThreadID, U_UserID, Likes, TextContent });
+    res.json({ PostID: result.insertId, T_ThreadID, U_UserID, Likes, TextContent }); // Respond with new post details
   });
 });
 
-// Update likes for a thread
+// Endpoint: Update likes for a thread
 app.patch('/api/threads/:threadID/like', (req, res) => {
   const { threadID } = req.params;
   const query = 'UPDATE Thread SET Likes = Likes + 1 WHERE ThreadID = ?';
   db.query(query, [threadID], (err) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle update errors
     }
-    res.send('Thread liked successfully');
+    res.send('Thread liked successfully'); // Confirm success
   });
 });
 
-// Update likes for a post
+// Endpoint: Update likes for a post
 app.patch('/api/posts/:postID/like', (req, res) => {
   const { postID } = req.params;
   const query = 'UPDATE Post SET Likes = Likes + 1 WHERE PostID = ?';
   db.query(query, [postID], (err) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle update errors
     }
-    res.send('Post liked successfully');
+    res.send('Post liked successfully'); // Confirm success
   });
 });
 
-// Get posts for a specific user by username
+// Endpoint: Get all posts by a specific user
 app.get('/api/user/:username', (req, res) => {
   const username = req.params.username;
-  console.log('Searching for user:', username);
   const queryUsr = 'SELECT UserID FROM User WHERE Username = ?';
   db.query(queryUsr, [username], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle errors during user search
     }
-
     if (result.length === 0) {
-      return res.status(404).send('User not found');
+      return res.status(404).send('User not found'); // Handle user not found
     }
-
     const userID = result[0].UserID;
     const queryPost = 'SELECT * FROM Post WHERE U_UserID = ?';
     db.query(queryPost, [userID], (err, p_result) => {
       if (err) {
-        return res.status(500).send(err);
+        return res.status(500).send(err); // Handle errors during post retrieval
       }
-      res.send(p_result);
+      res.json(p_result); // Return user's posts
     });
   });
 });
 
-// Get thread by title
+// Endpoint: Get thread by title
 app.get('/api/thread/:Title', (req, res) => {
   const Title = req.params.Title;
-  console.log('Searching for thread:', Title);
   const queryThread = 'SELECT * FROM Thread WHERE Title = ?';
   db.query(queryThread, [Title], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      return res.status(500).send(err); // Handle errors during thread search
     }
-    res.send(result);
+    res.json(result); // Return the thread details
   });
 });
 
-// Start the server
+// Start the server on port 5000
 app.listen(5000, () => {
-  console.log('Server is running on port 3000');
+  console.log('Server is running on port 5000');
 });
