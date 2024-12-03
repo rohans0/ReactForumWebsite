@@ -7,6 +7,17 @@ body {
   padding: 0;
 }
 
+
+.post-profile {
+	display: flex;
+	flex-direction:row;
+	gap: .6em;
+  margin-bottom: .6em;
+}
+.post-profile img {
+	height: 1em;
+}
+
 /* Main Container */
 .homepage {
   width: 60%;
@@ -40,7 +51,6 @@ body {
   background-color: #313436;
   color: #fff;
   padding: 10px 15px;
-  border: none;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -65,13 +75,15 @@ body {
 
 .post h2 {
   margin-top: 0;
+  color: #000;
+	text-decoration: none;
 }
 
 .post h6 {
 	margin: 0;
 }
 
-.post img {
+.post>img {
   display: block;
   margin: 10px 0;
   max-width: 100%;

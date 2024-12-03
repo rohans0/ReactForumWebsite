@@ -5,7 +5,7 @@ import "../styles/Homepage.css";
 
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", author: "", content: "", file: "" });
+  const [newPost, setNewPost] = useState({ title: "", author: "", pfp: "", content: "", file: "" });
   const [newReply, setNewReply] = useState([]);
   const [newFile, setNewFile] = useState();
 	const { user } = useAuth0();
@@ -36,6 +36,7 @@ const HomePage = () => {
         id: Date.now(),
         title: newPost.title,
 				author: user ? user.name : "Anon",
+				pfp: user ? user.picture : null,
         content: newPost.content,
         likes: 0,
         file: newFile || "",
@@ -122,7 +123,15 @@ const HomePage = () => {
 
       {/* Post Creation Form */}
       <form onSubmit={handlePostSubmit} className="post-form">
-				<h6>{user ? user.name : "Anon"}</h6>
+				<div className="post-profile">
+				{user ?
+					<>
+						<img src={user.picture} id="pfp"/>
+						<h6>{user.name}</h6>
+					</>:
+						<h6>Not Logged in. Posting as "Anon".</h6>
+				}
+				</div>
         <input
           type="text"
           name="title"
@@ -146,11 +155,16 @@ const HomePage = () => {
       <div className="posts">
         {posts.sort((a, b) => b.likes - a.likes).map((post) => (
           <div key={post.id} className="post">
+
+						<div className="post-profile">
+							<img src={post.pfp} />
+							<h6>{post.author}</h6>
+						</div>
             <nav>
-              <Link to={`/thread/${post.id}`} state={post}>{post.title}</Link>
+              <Link to={`/thread/${post.id}`} state={post}>
+								<h2>{post.title}</h2>
+							</Link>
             </nav>
-            <h6>{post.author}</h6>
-            <h2>{post.title}</h2>
             <p>{post.content}</p>
             {post.file && (
               <img

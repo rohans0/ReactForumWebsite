@@ -23,7 +23,7 @@ const AuthProfile = () => {
 
 	return (
 		<div>
-			<img src={user.picture} alt={user.name} id="pfp" />
+			<img src={user.picture} alt={user.name} id="profile-pfp" />
 			<div id="info">
 				<span>name: {user.name}</span>
 				<span>email: {user.email}</span>
