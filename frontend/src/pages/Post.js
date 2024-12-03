@@ -6,8 +6,31 @@ export const Post = () => {
     const data = useLocation();
     const gottenPost = data.state || {};
     const [post, setPost] = useState(gottenPost);
+    const [reply, setReply] = useState([]);
 
     console.log(gottenPost);
+
+    const handleReplyChange = (e) => {
+        setReply(e.target.value)
+    }
+
+    const handleReplySubmit = (e) => {
+        e.preventDefault();
+        if (reply) {
+            const currentReply = {
+                id: Date.now(),
+                content: reply,
+                likes: 0
+            };
+
+            
+            setPost((prev) => {
+                const currentReplies = [ ...prev.replies, currentReply ];
+                return { ...prev, replies: currentReplies };
+            });
+        }
+        setReply("");
+    }
 
     const handleReplyLike = (rID) => {
         setPost((post) => {
@@ -37,6 +60,10 @@ export const Post = () => {
             {/* Figure out how to dynamically edit width and height */}
             {post.file !== "" ? <img src={post.file || ""} alt="" width="500px" height="500px"></img> : <></>}
             <button onClick={handleLike}>Like ({post.likes})</button>
+            <form onSubmit={(e) => handleReplySubmit(e)} className="reply-form">
+              <textarea name="reply-content" placeholder="Write your Reply..." value={reply || ""} onChange={(e) => handleReplyChange(e)} required></textarea>
+              <button type="submit">Create Reply</button>
+            </form>
             <div className="replies">
                 {post.replies.map((reply) => (
                     <div key={reply.id} className="reply">
