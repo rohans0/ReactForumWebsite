@@ -1,12 +1,21 @@
 #info {
-	display: inline-block;
-  padding: 10px 20px;
-}
-#info>* {
-	display: block;
+	display: flex;
+	flex-direction: row;
+	gap: .6em;
+  margin-bottom: .6em;
+	align-self: center;
 }
 
 #profile-pfp {
-	width: 60px;
-	display: inline;
+	height: 60px;
+}
+
+#welcome {
+  margin: .3em 0;
+}
+
+#login,
+#logout {
+	height: .3em;
+	cursor: pointer;
 }

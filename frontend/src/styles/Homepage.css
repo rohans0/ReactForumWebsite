@@ -7,10 +7,9 @@ body {
   padding: 0;
 }
 
-
 .post-profile {
 	display: flex;
-	flex-direction:row;
+	flex-direction: row;
 	gap: .6em;
   margin-bottom: .6em;
 }

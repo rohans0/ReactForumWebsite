@@ -11,24 +11,23 @@ const AuthProfile = () => {
 	if (isLoading) {
 		return <div>Loading ...</div>;
 	}
-	if (!isAuthenticated) {
-		return (
-			<div>
-				<p>Not logged in.</p>
-				<AuthLogin />
-			</div>
-		);
-	}
-
 
 	return (
-		<div>
-			<img src={user.picture} alt={user.name} id="profile-pfp" />
-			<div id="info">
-				<span>name: {user.name}</span>
-				<span>email: {user.email}</span>
-				<AuthLogout />
-			</div>
+		<div id="info">
+			{!isAuthenticated ?
+				<>
+					<p>Not logged in.</p>
+					<AuthLogin id="login" />
+				</>
+				:
+				<>
+					<img src={user.picture} alt={user.name} id="profile-pfp" />
+					<div>
+						<p id="welcome">Welcome {user.name}!</p>
+						<AuthLogout id="logout" />
+					</div>
+				</>
+			}
 		</div>
 	);
 };
