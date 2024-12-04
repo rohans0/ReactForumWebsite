@@ -47,7 +47,8 @@ const HomePage = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ThreadID: Date.now(),
-            U_UserID: user?.sub || "anon",
+            U_UserID: user?.sub || null,
+						Username: user?.name|| "Anon",
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
@@ -77,13 +78,13 @@ const HomePage = () => {
       <h1>Create a New Post</h1>
       <form onSubmit={handlePostSubmit} className="post-form">
 				<div className="post-profile">
-				{user ?
-					<>
-						<img src={user.picture} id="pfp"/>
-						<h6>{user.name}</h6>
-					</>:
-						<h6>Not Logged in. Posting as "Anon".</h6>
-				}
+					{user ?
+						<>
+							<img src={user.picture} id="pfp"/>
+							<h6>{user.name}</h6>
+						</>:
+							<h6>Not Logged in. Posting as "Anon".</h6>
+					}
 				</div>
         <input
           type="text"
@@ -114,6 +115,10 @@ const HomePage = () => {
           {posts.map((post) => (
             <Link to={`/post/${post.ThreadID}`} state={post} key={post.ThreadID} className="post-link">
               <div className="post">
+								<div className="post-profile">
+									{/*<img src={user.picture} id="pfp"/> TODO: pfp*/}
+									<h6>{post.Username}</h6>
+								</div>
                 <h3>{post.Title}</h3>
                 <p>{post.TextContent}</p>
                 {post.ImageContent && post.ImageContent !== "" && (

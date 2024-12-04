@@ -47,7 +47,8 @@ export const Post = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             T_ThreadID: id,
-            U_UserID: user?.sub || "anon",
+            U_UserID: user ? user.sub : null,
+						Username: user ? user.name : "Anon",
             TextContent: newReply,
             Likes: 0, // Initialize likes at 0
           }),
