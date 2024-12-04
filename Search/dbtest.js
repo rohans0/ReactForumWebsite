@@ -9,9 +9,9 @@ app.use(express.static('public'));
 app.use(cors());
 
 const db = mysql.createConnection({
-    host: 'awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com',
-    user: 'forumAdmin',
-    password: 'forumPass437--',
+    host: 'awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com', 
+    user: 'forumAdmin', 
+    password: 'forumPass437--', 
     database: 'forum_database'
 })
 
@@ -22,11 +22,22 @@ db.connect((err) => {
     console.log('Connected to database');
 });
 
-
+app.get('/', (req, res) => {
+    db.query('SELECT * FROM User', (err, result) => {
+        if (err) {
+            console.error('Error querying database:', err);
+            return res.status(500
+            ).send(err);
+        }
+        res.send(result);
+    }
+    );
+});
 app.get('/user/:username', (req, res) => {
     const username = req.params.username; 
     console.log('Searching for:', username); 
     const queryUsr = 'SELECT UserID FROM User WHERE Username = ?'; 
+    //const queryUsr = 'SELECT * FROM Thread;'
     db.query(queryUsr, [username], (err, result) => {
         if (err) { 
             console.error('Error querying user:', err); return res.status(500).send(err); 
@@ -35,22 +46,27 @@ app.get('/user/:username', (req, res) => {
 
         } 
         const userID = result[0].UserID; console.log('UserID:', userID);
+        console.log(JSON.stringify(result));
         const queryThreads = 'SELECT * FROM Thread WHERE U_UserID = ?';
         db.query(queryThreads, [userID], (err, t_result) => {
-            if (err) { console.error('Error querying threads:', err); return res.status(500).send(err); } console.log('Threads:', t_result); res.send(t_result);
+            if (err) { console.error('Error querying threads:', err); return res.status(500).send(err); 
 
-            app.get('/thread/:Title', (req, res) => {
-                const Title = req.params.Title;
-                console.log('Searching for:', Title);
-                const queryThread = 'SELECT * FROM Thread WHERE Title = ?';
-                db.query(queryThread, [Title], (err, result) => {
-                    if (err) {
-                        return res.status(500).send(err);
-                    }
-                    res.send(result);
-                });
-            });
+            } 
+            console.log('Threads:', t_result); 
+            res.send(t_result);
+
         });
+    });
+});
+app.get('/thread/:Title', (req, res) => {
+    const Title = req.params.Title;
+    console.log('Searching for:', Title);
+    const queryThread = 'SELECT * FROM Thread WHERE Title = ?';
+    db.query(queryThread, [Title], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.send(result);
     });
 });
 

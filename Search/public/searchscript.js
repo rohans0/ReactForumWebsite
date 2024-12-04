@@ -6,13 +6,15 @@ let foundResult = false;
 inputField.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         searchQuery = inputField.value;
-        output.textContent = `Searching for: ${searchQuery}`;
+        output.innerHTML = `Searching for: ${searchQuery}<br>`;
 
         fetch(`http://localhost:3000/user/${searchQuery}`)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
-                output.textContent += `\nServer response: ${JSON.stringify(data)}`;
+                for(let thread of data) {
+                    console.log(data);
+                    output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
+                }
             })
             .catch((error) => {
                 /*console.error('Error:', error);
@@ -22,8 +24,10 @@ inputField.addEventListener('keydown', (event) => {
         fetch(`http://localhost:3000/thread/${searchQuery}`)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
-                output.textContent += `\nServer response: ${JSON.stringify(data)}`;
+                for(let thread of data) {
+                    console.log(data);
+                    output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
+                }
             })
             .catch((error) => {
                 /*console.error('Error:', error);
