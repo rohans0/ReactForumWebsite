@@ -7,32 +7,55 @@ inputField.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
         searchQuery = inputField.value;
         output.innerHTML = `Searching for: ${searchQuery}<br>`;
-
-        fetch(`http://localhost:3000/user/${searchQuery}`)
-            .then((response) => response.json())
-            .then((data) => {
-                for(let thread of data) {
-                    console.log(data);
-                    output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
-                }
-            })
-            .catch((error) => {
-                /*console.error('Error:', error);
-                output.textContent += `\nError: ${error}`;*/
-            });
-            
-        fetch(`http://localhost:3000/thread/${searchQuery}`)
-            .then((response) => response.json())
-            .then((data) => {
-                for(let thread of data) {
-                    console.log(data);
-                    output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
-                }
-            })
-            .catch((error) => {
-                /*console.error('Error:', error);
-                output.textContent += `\nError: ${error}`;*/
-            });
-
+        fetchThreadsAndPostsByUser(searchQuery);
+        fetchThreadsAndPostsByThreadTitle(searchQuery);
     }
 });
+async function fetchThreadsAndPostsByUser(searchQuery) {
+    try {
+
+        const response = await fetch(`http://localhost:3000/user/${searchQuery}`);
+        const threads = await response.json();
+
+        for (let thread of threads) {
+            console.log(thread);
+            output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
+
+            const postResponse = await fetch(`http://localhost:3000/post/${thread.ThreadID}`);
+            const posts = await postResponse.json();
+
+            for (let post of posts) {
+                console.log(post);
+                output.innerHTML += `<br>${post.TextContent}<br>Likes: ${post.likes}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function fetchThreadsAndPostsByThreadTitle(searchQuery) {
+    try {
+        const response = await fetch(`http://localhost:3000/thread/${searchQuery}`);
+        const threads = await response.json();
+
+        for (let thread of threads) {
+            console.log(thread);
+            output.innerHTML += `<br>${thread.Title}<br>${thread.TextContent}`;
+
+            const postResponse = await fetch(`http://localhost:3000/post/${thread.ThreadID}`);
+            const posts = await postResponse.json();
+
+            for (let post of posts) {
+                console.log(post);
+                output.innerHTML += `<br>${post.TextContent}<br>Likes: ${post.likes}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Call the function
+fetchThreadsAndPosts(searchQuery);
+

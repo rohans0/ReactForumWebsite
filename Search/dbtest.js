@@ -69,7 +69,18 @@ app.get('/thread/:Title', (req, res) => {
         res.send(result);
     });
 });
-
+app.get('/post/:TID', (req, res) => {
+    const TID = req.params.TID;
+    console.log('Searching for:', TID);
+    const queryPostByTID = 'SELECT * FROM Post WHERE T_ThreadID = ?';
+    db.query(queryPostByTID, [TID], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        console.log(result);
+        res.send(result);
+    });
+});
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
