@@ -32,6 +32,7 @@ app.get('/api/threads', (req, res) => {
       t.ThreadID, 
       t.U_UserID AS ThreadOwnerID, 
       u.Username AS ThreadOwner, 
+			t.Username AS User,
       t.Title, 
       t.DateCreated, 
       t.Likes, 
@@ -76,6 +77,7 @@ app.get('/api/threads', (req, res) => {
 // Endpoint: Create a new thread
 app.post('/api/threads', (req, res) => {
   const { U_UserID, Username, Title, ImageContent, TextContent, Likes = 0 } = req.body;
+	
   const query = `INSERT INTO Thread (ThreadID, U_UserID, Username, Title, DateCreated, Likes, TextContent, ImageContent)
                              VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?)`;
   db.query(query, [null, U_UserID, Username, Title, Likes, TextContent, ImageContent], (err, result) => {

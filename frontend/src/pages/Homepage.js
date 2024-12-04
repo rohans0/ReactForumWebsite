@@ -47,8 +47,8 @@ const HomePage = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ThreadID: Date.now(),
-            U_UserID: user?.sub || null,
-						Username: user?.name|| "Anon",
+            U_UserID: user ? user.sub : null,
+						Username: user ? user.nickname : null,
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
@@ -67,6 +67,8 @@ const HomePage = () => {
         setNewPost({ title: "", content: "" });
         setNewFile(null);
         document.getElementById("file-upload").value = null;
+
+				window.location.reload(); // FIXME: ?
       } catch (error) {
         console.error("Error creating post:", error);
       }
@@ -81,7 +83,7 @@ const HomePage = () => {
 					{user ?
 						<>
 							<img src={user.picture} id="pfp"/>
-							<h6>{user.name}</h6>
+							<h6>{user.nickname}</h6>
 						</>:
 							<h6>Not Logged in. Posting as "Anon".</h6>
 					}
@@ -117,7 +119,7 @@ const HomePage = () => {
               <div className="post">
 								<div className="post-profile">
 									{/*<img src={user.picture} id="pfp"/> TODO: pfp*/}
-									<h6>{post.Username}</h6>
+									<h6>{post.User ? post.User : "Anon"}</h6>
 								</div>
                 <h3>{post.Title}</h3>
                 <p>{post.TextContent}</p>
