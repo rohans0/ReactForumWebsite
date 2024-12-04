@@ -21,6 +21,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+		"connect": "node src/services/server.js & npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
