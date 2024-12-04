@@ -7,6 +7,16 @@ body {
   padding: 0;
 }
 
+.post-profile {
+	display: flex;
+	flex-direction: row;
+	gap: .6em;
+  margin-bottom: .6em;
+}
+.post-profile img {
+	height: 1em;
+}
+
 /* Main Container */
 .homepage {
   width: 60%;
@@ -40,7 +50,6 @@ body {
   background-color: #313436;
   color: #fff;
   padding: 10px 15px;
-  border: none;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -94,10 +103,11 @@ body {
 .homepage .post h2 {
   margin-top: 0;
   font-size: 1.5rem;
-  color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #000;
+	text-decoration: none;
 }
 
 /* Post Content */
