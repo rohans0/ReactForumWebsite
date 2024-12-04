@@ -60,7 +60,7 @@ body {
 
 /* Posts Container */
 .homepage .posts-container {
-  margin-top: 40px;
+  margin-top: 50px;
 }
 
 .homepage .posts-container h2 {
@@ -95,7 +95,7 @@ body {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  height: 350px;
   overflow: hidden;
 }
 
