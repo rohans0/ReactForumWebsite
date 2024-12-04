@@ -51,7 +51,7 @@ const HomePage = () => {
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
-            ImageContent: newFile || "",
+            ImageContent: null,
           }),
         });
         const createdPost = await response.json();
@@ -103,16 +103,11 @@ const HomePage = () => {
         <h2>All Posts</h2>
         <div className="posts">
           {posts.map((post) => (
-            <Link 
-              to={`/post/${post.ThreadID}`} 
-              state={post} 
-              key={post.ThreadID}
-              className="post-link"
-            >
+            <Link to={`/post/${post.ThreadID}`} state={post} key={post.ThreadID} className="post-link">
               <div className="post">
                 <h3>{post.Title}</h3>
                 <p>{post.TextContent}</p>
-                {post.ImageContent && (
+                {post.ImageContent && post.ImageContent !== "" && (
                   <img
                     src={post.ImageContent}
                     alt="Post Attachment"
