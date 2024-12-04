@@ -17,14 +17,14 @@ const AuthProfile = () => {
 			{!isAuthenticated ?
 				<>
 					<p>Not logged in.</p>
-					<AuthLogin id="login" />
+					<AuthLogin />
 				</>
 				:
 				<>
 					<img src={user.picture} alt={user.name} id="profile-pfp" />
 					<div>
 						<p id="welcome">Welcome {user.name}!</p>
-						<AuthLogout id="logout" />
+						<AuthLogout />
 					</div>
 				</>
 			}

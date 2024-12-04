@@ -76,6 +76,15 @@ const HomePage = () => {
     <div className="homepage">
       <h1>Create a New Post</h1>
       <form onSubmit={handlePostSubmit} className="post-form">
+				<div className="post-profile">
+				{user ?
+					<>
+						<img src={user.picture} id="pfp"/>
+						<h6>{user.name}</h6>
+					</>:
+						<h6>Not Logged in. Posting as "Anon".</h6>
+				}
+				</div>
         <input
           type="text"
           name="title"

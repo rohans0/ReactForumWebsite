@@ -1,9 +1,16 @@
 #info {
 	display: flex;
 	flex-direction: row;
-	gap: .6em;
- 	margin-bottom: .6em;
-	align-self: center;
+	gap: 1em;
+	justify-content: center;
+}
+
+#login,
+#logout {
+	border-radius: 5px;
+	height: 1.5em;
+	cursor: pointer;
+	margin: auto 0;
 }
 
 #profile-pfp {
@@ -11,11 +18,6 @@
 }
 
 #welcome {
-  margin: .3em 0;
+  margin: .2em 0;
 }
 
-#login,
-#logout {
-	height: .3em;
-	cursor: pointer;
-}
