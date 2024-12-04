@@ -179,6 +179,7 @@ app.get('/api/threads/:threadID', (req, res) => {
       t.ThreadID, 
       t.U_UserID AS ThreadOwnerID, 
       u.Username AS ThreadOwner, 
+      t.Username AS User, 
       t.Title, 
       t.DateCreated, 
       t.Likes, 

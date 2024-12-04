@@ -48,7 +48,7 @@ export const Post = () => {
           body: JSON.stringify({
             T_ThreadID: id,
             U_UserID: user ? user.sub : null,
-						Username: user ? user.name : "Anon",
+						Username: user ? user.name : "Anon", // TODO: UNUSED ATM
             TextContent: newReply,
             Likes: 0, // Initialize likes at 0
           }),
@@ -107,6 +107,10 @@ export const Post = () => {
 
   return (
     <div className="post">
+			<div className="post-profile">
+				{/*<img src={user.picture} id="pfp"/> TODO: pfp*/}
+				<h6>{post.User ? post.User : "Anon"}</h6>
+			</div>
       <h1>{post.Title}</h1>
       <p>{post.TextContent}</p>
       {post.ImageContent && (

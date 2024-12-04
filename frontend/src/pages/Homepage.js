@@ -6,7 +6,7 @@ import "../styles/Homepage.css";
 const API_BASE_URL = "http://localhost:5000/api";
 
 const HomePage = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(["not connected"]);
   const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [newFile, setNewFile] = useState(null);
   const { user } = useAuth0();
@@ -114,7 +114,9 @@ const HomePage = () => {
       <div className="posts-container">
         <h2>All Posts</h2>
         <div className="posts">
-          {posts.map((post) => (
+          {posts[0] === "not connected" ?
+						<div>Not connected to database.</div>
+						: posts.map((post) => (
             <Link to={`/post/${post.ThreadID}`} state={post} key={post.ThreadID} className="post-link">
               <div className="post">
 								<div className="post-profile">
