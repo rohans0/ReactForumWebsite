@@ -17,6 +17,7 @@ const Header = () => {
           </li>*/}
         </ul>
       </nav>
+      <h1>Game Realm</h1>
 			<AuthProfile />
     </header>
   );
