@@ -1,77 +1,151 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import "../styles/Homepage.css";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import "../styles/Post.css";
+
+// Base URL for API endpoints
+const API_BASE_URL = "http://localhost:5000/api";
 
 export const Post = () => {
-    const data = useLocation();
-    const gottenPost = data.state || {};
-    const [post, setPost] = useState(gottenPost);
-    const [reply, setReply] = useState([]);
+  const { id } = useParams(); // Fetch the thread ID from the URL
+  const [post, setPost] = useState(null);
+  const [reply, setReply] = useState("");
+  const [newReply, setNewReply] = useState(""); // State for the reply input
+  const { user } = useAuth0(); // User info from Auth0
 
-    console.log(gottenPost);
-
-    const handleReplyChange = (e) => {
-        setReply(e.target.value)
-    }
-
-    const handleReplySubmit = (e) => {
-        e.preventDefault();
-        if (reply) {
-            const currentReply = {
-                id: Date.now(),
-                content: reply,
-                likes: 0
-            };
-
-            
-            setPost((prev) => {
-                const currentReplies = [ ...prev.replies, currentReply ];
-                return { ...prev, replies: currentReplies };
-            });
-        }
-        setReply("");
-    }
-
-    const handleReplyLike = (rID) => {
-        setPost((post) => {
-            const arrayOfReplies = [...post.replies];
-            for (let j = 0; j < arrayOfReplies.length; j++) {
-                const reply = arrayOfReplies[j];
-                if (reply.id === rID) {
-                    reply.likes = reply.likes + 1;
-                }
-            }
-            /* Use spread operator (assigning normal does not work) */
-            return { ...post, replies: arrayOfReplies };
-        })
-    }
-
-    const handleLike = () => {
-        setPost({ ...post, likes: post.likes + 1 });
+  // Fetch the post and replies when the component mounts
+  useEffect(() => {
+    const loadPost = async () => {
+      try {
+        // Fetch the thread by its ID
+        const response = await fetch(`${API_BASE_URL}/threads/${id}`);
+        const data = await response.json();
+        // Ensure replies are always an array
+        if (Array.isArray(data.Replies)) {
+            data.Replies = data.Replies.filter((reply) => reply !== null); // Remove null values
+          }
+          setPost(data);
+      } catch (error) {
+        console.error("Error fetching post:", error); // Log errors
+      }
     };
+    loadPost(); // Fetch the post and replies
+  }, [id]);
 
+  // Handle the reply input change
+  const handleReplyChange = (e) => {
+    setNewReply(e.target.value);
+  };
 
+  // Handle the reply submission
+  const handleReplySubmit = async (e) => {
+    e.preventDefault(); // Prevent page reload
+    if (newReply) {
+      try {
+        // Create a new reply
+        const response = await fetch(`${API_BASE_URL}/posts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            T_ThreadID: id,
+            U_UserID: user?.sub || "anon",
+            TextContent: newReply,
+            Likes: 0, // Initialize likes at 0
+          }),
+        });
+        const createdReply = await response.json();
+        
+        // Add the new reply to the post's replies
+        setPost((prevPost) => ({
+          ...prevPost,
+          Replies: [...prevPost.Replies, createdReply],
+        }));
 
-    return (
-        <div className="post">
-            <h1>The route is working!</h1>
-            <h2>{post.title}</h2>
-            <p>{post.content}</p>
-            {/* Figure out how to dynamically edit width and height */}
-            {post.file !== "" ? <img src={post.file || ""} alt="" width="500px" height="500px"></img> : <></>}
-            <button onClick={handleLike}>Like ({post.likes})</button>
-            <form onSubmit={(e) => handleReplySubmit(e)} className="reply-form">
-              <textarea name="reply-content" placeholder="Write your Reply..." value={reply || ""} onChange={(e) => handleReplyChange(e)} required></textarea>
-              <button type="submit">Create Reply</button>
-            </form>
-            <div className="replies">
-                {post.replies.map((reply) => (
-                    <div key={reply.id} className="reply">
-                        <p>{reply.content}</p>
-                        <button onClick={() => handleReplyLike(reply.id)}>Like ({reply.likes})</button>
-                    </div>
-                ))}
+        setNewReply(""); // Clear the reply input after submission
+      } catch (error) {
+        console.error("Error submitting reply:", error);
+      }
+    }
+  };
+
+  // Handle liking a reply
+  const handleReplyLike = async (rID) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts/${rID}/like`, {
+        method: "PATCH",
+      });
+      if (response.ok) {
+        setPost((prevPost) => ({
+          ...prevPost,
+          Replies: prevPost.Replies.map((reply) =>
+            reply.PostID === rID
+              ? { ...reply, Likes: reply.Likes + 1 }
+              : reply
+          ),
+        }));
+      }
+    } catch (error) {
+      console.error("Error liking reply:", error);
+    }
+  };
+
+  // Handle liking the post itself
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/threads/${id}/like`, {
+        method: "PATCH",
+      });
+      if (response.ok) {
+        setPost((prevPost) => ({ ...prevPost, Likes: prevPost.Likes + 1 }));
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+
+  if (!post) return <div>Loading...</div>;
+
+  return (
+    <div className="post">
+      <h1>{post.Title}</h1>
+      <p>{post.TextContent}</p>
+      {post.ImageContent && (
+        <img
+          src={post.ImageContent}
+          alt="Thread"
+          width="500px"
+          height="500px"
+        />
+      )}
+      <button onClick={handleLike}>Like ({post.Likes})</button>
+
+      {/* Reply Form */}
+      <form onSubmit={handleReplySubmit} className="reply-form">
+        <textarea
+          name="reply-content"
+          placeholder="Write your Reply..."
+          value={newReply}
+          onChange={handleReplyChange}
+          required
+        ></textarea>
+        <button type="submit">Create Reply</button>
+      </form>
+
+      {/* Replies Section */}
+      <div className="replies">
+        {post.Replies.length > 0 ? (
+          post.Replies.map((reply) => (
+            <div key={reply.PostID} className="reply">
+              <p>{reply.TextContent}</p>
+              <button onClick={() => handleReplyLike(reply.PostID)}>
+                Like ({reply.Likes})
+              </button>
             </div>
-        </div>
-    )
-}
+          ))
+        ) : (
+          <p>No replies yet</p>
+        )}
+      </div>
+    </div>
+  );
+};

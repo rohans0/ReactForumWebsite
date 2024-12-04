@@ -1,20 +1,18 @@
-const mysql = require('mysql2');
+const mysql = require("mysql2/promise");
 
-const databaseConfig = {
-    host: 'awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com',
-    user: 'forumAdmin',
-    password: 'forumPass437--',
-    database: 'forum_database',
-    port: 3306 
+const testConnection = async () => {
+  const db = mysql.createPool({
+    host: "awseb-e-zhqfdcnx8v-stack-awsebrdsdatabase-kxqm7dfshlbt.c36oooeyur08.us-west-1.rds.amazonaws.com",
+    user: "forumAdmin",
+    password: "forumPass437--",
+    database: "forum_database",
+  });
+  try {
+    const [rows] = await db.query("SELECT 1");
+    console.log("Connection successful:", rows);
+  } catch (error) {
+    console.error("Connection failed:", error.message);
+  }
 };
 
-const connection = mysql.createConnection(databaseConfig);
-
-connection.connect((err) => {
-    if (err) {
-        console.error('Connection failed:', err.stack);
-        return;
-    }
-    console.log('Connected successfully to the database.');
-    connection.end();
-});
+testConnection();

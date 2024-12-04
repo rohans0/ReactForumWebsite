@@ -1,137 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
 
+const API_BASE_URL = "http://localhost:5000/api";
+
 const HomePage = () => {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", author: "", pfp: "", content: "", file: "" });
-  const [newReply, setNewReply] = useState([]);
-  const [newFile, setNewFile] = useState();
-	const { user } = useAuth0();
+  const [newPost, setNewPost] = useState({ title: "", content: "" });
+  const [newFile, setNewFile] = useState(null);
+  const { user } = useAuth0();
 
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/threads`);
+        const data = await response.json();
+        
+        // Sort posts by Likes in descending order (highest first)
+        const sortedPosts = data.sort((a, b) => b.Likes - a.Likes);
+
+        setPosts(sortedPosts); // Set sorted posts in state
+      } catch (error) {
+        console.error("Error fetching threads:", error);
+      }
+    };
+    loadPosts();
+  }, []);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPost((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileUpload = (e) => {
-    if (e.target.files.length !== 0) {
+    if (e.target.files.length > 0) {
       setNewFile(URL.createObjectURL(e.target.files[0]));
     }
   };
 
-  /* pID = ID of parent post */
-  const handleReplyChange = (pID, e) => {
-    const content = e.target.value;
-    /* Modeled after handleInputChange */
-    /* Setting the 'name' as the post_ID helps with connecting reply and post */
-    setNewReply((prev) => ({ ...prev, [pID]: content }));
-  };
-
-  const handlePostSubmit = (e) => {
+  const handlePostSubmit = async (e) => {
     e.preventDefault();
     if (newPost.title && newPost.content) {
-      const post = {
-        id: Date.now(),
-        title: newPost.title,
-				author: user ? user.name : "Anon",
-				pfp: user ? user.picture : null,
-        content: newPost.content,
-        likes: 0,
-        file: newFile || "",
-        replies: [],
-      };
-      setPosts((prev) => [post, ...prev]);
-      setNewPost({ title: "", author: "", content: "", file: "" });
-      setNewFile(null);
-      document.getElementById("test").value = null; /* we need to edit this */
+      try {
+        const response = await fetch(`${API_BASE_URL}/threads`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ThreadID: Date.now(),
+            U_UserID: user?.sub || "anon",
+            Title: newPost.title,
+            TextContent: newPost.content,
+            Likes: 0,
+            ImageContent: newFile || "",
+          }),
+        });
+        const createdPost = await response.json();
+        
+        // Add the newly created post to the front of the list and sort
+        setPosts((prev) => {
+          const updatedPosts = [createdPost, ...prev];
+          updatedPosts.sort((a, b) => b.Likes - a.Likes); // Re-sort after new post creation
+          return updatedPosts;
+        });
+        // Reset form
+        setNewPost({ title: "", content: "" });
+        setNewFile(null);
+        document.getElementById("file-upload").value = null;
+      } catch (error) {
+        console.error("Error creating post:", error);
+      }
     }
   };
-
-  const handleReplySubmit = (pID, e) => {
-    e.preventDefault();
-    if (newReply[pID]) {
-      const reply = {
-        id: Date.now(),
-        content: newReply[pID],
-        likes: 0,
-      };
-
-      setPosts((prev) => {
-        return prev.map((post) => {
-          if (post.id === pID) {
-            return { ...post, replies: [...post.replies, reply] }
-          } else {
-            return post;
-          }
-        })
-      })
-
-//       setPosts((prev) =>
-//         prev.map((post) =>
-//           post.id === pID
-//             ? { ...post, replies: [...post.replies, reply] }
-//             : post
-//         )
-//       );
-
-      setNewReply((prev) => ({ ...prev, [pID]: "" }));
-    }
-  };
-
-  const handleLike = (id) => {
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === id ? { ...post, likes: post.likes + 1 } : post
-      )
-    )
-  };
-  
-  const handleReplyLike = (pID, rID) => {
-    setPosts((prev) => {
-      const arrayOfPosts = [...prev];
-      for (let i = 0; i < arrayOfPosts.length; i++) {
-        const post = arrayOfPosts[i];
-        if (post.id === pID) {
-          const arrayOfReplies = [...post.replies];
-          for (let j = 0; j < arrayOfReplies.length; j++) {
-            const reply = arrayOfReplies[j];
-            if (reply.id === rID) {
-              reply.likes = reply.likes + 1;
-            }
-          }
-        }
-      }
-      return arrayOfPosts;
-    });
-  };
-
-  const countComments = (replies) => {
-    let count = replies.length;
-    replies.forEach((reply) => {
-      if (reply.replies) {
-        count += countComments(reply.replies);
-      }
-    });
-    return count;
-  };  
 
   return (
     <div className="homepage">
-      <h1>Home</h1>
-
-      {/* Post Creation Form */}
+      <h1>Create a New Post</h1>
       <form onSubmit={handlePostSubmit} className="post-form">
-				<div className="post-profile">
-				{user ?
-					<>
-						<img src={user.picture} id="pfp"/>
-						<h6>{user.name}</h6>
-					</>:
-						<h6>Not Logged in. Posting as "Anon".</h6>
-				}
-				</div>
         <input
           type="text"
           name="title"
@@ -147,76 +91,33 @@ const HomePage = () => {
           onChange={handleInputChange}
           required
         />
-        <input type="file" name="file-upload" id="test" onChange={handleFileUpload}></input>
+        <input
+          type="file"
+          name="file-upload"
+          id="file-upload"
+          onChange={handleFileUpload}
+        />
         <button type="submit">Create Post</button>
       </form>
-
-      {/* Post List */}
-      <div className="posts">
-        {posts.sort((a, b) => b.likes - a.likes).map((post) => (
-          <div key={post.id} className="post">
-
-						<div className="post-profile">
-							<img src={post.pfp} />
-							<h6>{post.author}</h6>
-						</div>
-            <nav>
-              <Link to={`/thread/${post.id}`} state={post}>
-								<h2>{post.title}</h2>
-							</Link>
-            </nav>
-            <p>{post.content}</p>
-            {post.file && (
-              <img
-                src={post.file}
-                alt="Post Attachment"
-                style={{ width: "100%", maxHeight: "400px", objectFit: "contain" }}
-              />
-            )}
-            <div className="post-actions">
-              <button onClick={() => handleLike(post.id)}>
-                👍 Likes ({post.likes})
-              </button>
-              <a
-                href={`#post-${post.id}-comments`}
-                className="comment-counter"
-                title="View Comments"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M20 2H4a2 2 0 00-2 2v16l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm0 12H6.83L4 16.83V4h16v10z" />
-                </svg>
-                {countComments(post.replies)}
-              </a>
+      <div className="posts-container">
+        <h2>All Posts</h2>
+        <div className="posts">
+          {posts.map((post) => (
+            <div key={post.ThreadID} className="post">
+              <Link to={`/post/${post.ThreadID}`} state={post}>
+                <h3>{post.Title}</h3>
+              </Link>
+              <p>{post.TextContent}</p>
+              {post.ImageContent && (
+                <img
+                  src={post.ImageContent}
+                  alt="Post Attachment"
+                  style={{ width: "100%", maxHeight: "200px", objectFit: "contain" }}
+                />
+              )}
             </div>
-            <form
-              onSubmit={(e) => handleReplySubmit(post.id, e)}
-              className="reply-form"
-            >
-              <textarea
-                name="reply-content"
-                placeholder="Write your Reply..."
-                value={newReply[post.id] || ""}
-                onChange={(e) => handleReplyChange(post.id, e)}
-                required
-              ></textarea>
-              <button type="submit">Reply</button>
-            </form>
-            <div className="replies">
-              {post.replies.map((reply) => (
-                <div key={reply.id} className="reply">
-                  <p>{reply.content}</p>
-                  <button onClick={() => handleReplyLike(post.id, reply.id)}>
-                    Like ({reply.likes})
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
