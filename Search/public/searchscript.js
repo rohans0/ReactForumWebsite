@@ -28,6 +28,7 @@ async function fetchThreadsAndPostsByUser(searchQuery) {
                 console.log(post);
                 output.innerHTML += `<br>${post.TextContent}<br>Likes: ${post.likes}`;
             }
+            output.innerHTML += '<br>';
         }
     } catch (error) {
         console.error('Error:', error);
@@ -48,7 +49,7 @@ async function fetchThreadsAndPostsByThreadTitle(searchQuery) {
 
             for (let post of posts) {
                 console.log(post);
-                output.innerHTML += `<br>${post.TextContent}<br>Likes: ${post.likes}`;
+                output.innerHTML += `<br><br>${post.TextContent}<br>Likes: ${post.likes}`;
             }
         }
     } catch (error) {
