@@ -103,19 +103,19 @@ const HomePage = () => {
         <h2>All Posts</h2>
         <div className="posts">
           {posts.map((post) => (
-            <div key={post.ThreadID} className="post">
-              <Link to={`/post/${post.ThreadID}`} state={post}>
+            <Link to={`/post/${post.ThreadID}`} state={post} key={post.ThreadID} className="post-link">
+              <div className="post">
                 <h3>{post.Title}</h3>
-              </Link>
-              <p>{post.TextContent}</p>
-              {post.ImageContent && post.ImageContent !== "" && (
-                <img
-                  src={post.ImageContent}
-                  alt="Post Attachment"
-                  style={{ width: "100%", maxHeight: "200px", objectFit: "contain" }}
-                />
-              )}
-            </div>
+                <p>{post.TextContent}</p>
+                {post.ImageContent && post.ImageContent !== "" && (
+                  <img
+                    src={post.ImageContent}
+                    alt="Post Attachment"
+                    style={{ width: "100%", maxHeight: "200px", objectFit: "contain" }}
+                  />
+                )}
+              </div>
+            </Link>
           ))}
         </div>
       </div>
