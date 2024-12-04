@@ -52,7 +52,7 @@ const HomePage = () => {
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
-            ImageContent: newFile || "",
+            ImageContent: null,
           }),
         });
         const createdPost = await response.json();
@@ -110,7 +110,7 @@ const HomePage = () => {
                 <h3>{post.Title}</h3>
               </Link>
               <p>{post.TextContent}</p>
-              {post.ImageContent && (
+              {post.ImageContent && post.ImageContent !== "" && (
                 <img
                   src={post.ImageContent}
                   alt="Post Attachment"

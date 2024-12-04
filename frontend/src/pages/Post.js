@@ -9,7 +9,6 @@ const API_BASE_URL = "http://localhost:5000/api";
 export const Post = () => {
   const { id } = useParams(); // Fetch the thread ID from the URL
   const [post, setPost] = useState(null);
-  const [reply, setReply] = useState("");
   const [newReply, setNewReply] = useState(""); // State for the reply input
   const { user } = useAuth0(); // User info from Auth0
 
