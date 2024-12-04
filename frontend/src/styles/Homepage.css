@@ -79,6 +79,11 @@ body {
   gap: 20px;
 }
 
+.post-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* Post Card */
 .homepage .post {
   background-color: #fff;
@@ -155,3 +160,4 @@ body {
 .homepage .post-actions button:hover {
   background-color: #218838;
 }
+
