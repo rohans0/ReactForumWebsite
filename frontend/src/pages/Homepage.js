@@ -27,7 +27,6 @@ const HomePage = () => {
     };
     loadPosts();
   }, []);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPost((prev) => ({ ...prev, [name]: value }));
@@ -63,7 +62,6 @@ const HomePage = () => {
           updatedPosts.sort((a, b) => b.Likes - a.Likes); // Re-sort after new post creation
           return updatedPosts;
         });
-
         // Reset form
         setNewPost({ title: "", content: "" });
         setNewFile(null);
