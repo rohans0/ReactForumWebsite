@@ -42,15 +42,16 @@ app.get('/user/:username', (req, res) => {
         if (err) { 
             console.error('Error querying user:', err); return res.status(500).send(err); 
         } 
-        if (result.length === 0) { console.log('User not found'); return res.status(404).send('User not found'); 
-
+        if (result.length === 0) { console.log('User not found'); 
+            return res.status(404).send('User not found'); 
         } 
-        const userID = result[0].UserID; console.log('UserID:', userID);
+        const userID = result[0].UserID; 
+        console.log('UserID:', userID);
         console.log(JSON.stringify(result));
         const queryThreads = 'SELECT * FROM Thread WHERE U_UserID = ?';
         db.query(queryThreads, [userID], (err, t_result) => {
-            if (err) { console.error('Error querying threads:', err); return res.status(500).send(err); 
-
+            if (err) { console.error('Error querying threads:', err); 
+                return res.status(500).send(err); 
             } 
             console.log('Threads:', t_result); 
             res.send(t_result);
