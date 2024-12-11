@@ -48,7 +48,7 @@ const HomePage = () => {
           body: JSON.stringify({
             ThreadID: Date.now(),
             U_UserID: user ? user.sub : null,
-						Username: user ? user.nickname : null,
+						Username: user ? user.nickname : "Anon",
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
