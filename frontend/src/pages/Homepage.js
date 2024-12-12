@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import "../styles/Homepage.css";
+// import CloudinaryUploadWidget from './components/CloudinaryUploadWidget';
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -10,7 +11,6 @@ const HomePage = () => {
   const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [newFile, setNewFile] = useState(null);
   const { user } = useAuth0();
-
   useEffect(() => {
     const loadPosts = async () => {
       try {
@@ -27,19 +27,41 @@ const HomePage = () => {
     };
     loadPosts();
   }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPost((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {    
     if (e.target.files.length > 0) {
-      setNewFile(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      const form = new FormData();
+      form.append("file", file);
+      form.append("upload_preset", "default");
+      if (file) {
+        try {
+          const response = await fetch("https://api.cloudinary.com/v1_1/dpbfdejni/image/upload", {
+            method: "POST",
+            // headers: { "Content-Type": "application/json"},
+            body: form
+          });
+          const data = await response.json();
+          console.log(data);
+          let secureURL = JSON.stringify(data.secure_url);
+          setNewFile(secureURL);
+          console.log(`public id: ${data.public_id}, secure url: ${secureURL}`);
+        }
+        catch (error) {
+          console.log(error);
+        }
+      }
     }
   };
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
+    console.log(newFile);
     if (newPost.title && newPost.content) {
       try {
         const response = await fetch(`${API_BASE_URL}/threads`, {
@@ -48,15 +70,15 @@ const HomePage = () => {
           body: JSON.stringify({
             ThreadID: Date.now(),
             U_UserID: user ? user.sub : null,
-						Username: user ? user.nickname : null,
+						Username: user ? user.nickname : "Anon",
             Title: newPost.title,
             TextContent: newPost.content,
             Likes: 0,
-            ImageContent: null,
+            ImageContent: JSON.parse(newFile),
           }),
         });
         const createdPost = await response.json();
-        
+        console.log(createdPost.ImageContent);
         // Add the newly created post to the front of the list and sort
         setPosts((prev) => {
           const updatedPosts = [createdPost, ...prev];
@@ -82,7 +104,7 @@ const HomePage = () => {
 				<div className="post-profile">
 					{user ?
 						<>
-							<img src={user.picture} id="pfp"/>
+							<img src={user.picture} alt="Profile" id="pfp"/>
 							<h6>{user.nickname}</h6>
 						</>:
 							<h6>Not Logged in. Posting as "Anon".</h6>
@@ -129,7 +151,7 @@ const HomePage = () => {
                   <img
                     src={post.ImageContent}
                     alt="Post Attachment"
-                    style={{ width: "100%", maxHeight: "200px", objectFit: "contain" }}
+                    style={{ width: "100%", maxHeight: "50%", objectFit: "contain" }}
                   />
                 )}
               </div>

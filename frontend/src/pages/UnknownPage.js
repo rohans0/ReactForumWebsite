@@ -1,5 +1,6 @@
 import React from "react";
 
+/* This file is specifically for handling invalid pages */
 export const UnknownPage = () => {
     return (
         <div>

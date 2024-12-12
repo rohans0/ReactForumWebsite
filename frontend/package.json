@@ -4,10 +4,13 @@
   "private": true,
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",
+    "@cloudinary/react": "^1.13.1",
+    "@cloudinary/url-gen": "^1.21.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "body-parser": "^1.20.3",
+    "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "frontend": "file:",
@@ -21,7 +24,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-		"connect": "node src/services/server.js & npm start",
+    "connect": "react-scripts node src/services/server.js & npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
