@@ -43,14 +43,13 @@ const HomePage = () => {
         try {
           const response = await fetch("https://api.cloudinary.com/v1_1/dpbfdejni/image/upload", {
             method: "POST",
+            // for some reason headers breaks it. Probably becauses cloudinary upload is an http request?
             // headers: { "Content-Type": "application/json"},
             body: form
           });
           const data = await response.json();
-          console.log(data);
           let secureURL = JSON.stringify(data.secure_url);
           setNewFile(secureURL);
-          console.log(`public id: ${data.public_id}, secure url: ${secureURL}`);
         }
         catch (error) {
           console.log(error);
