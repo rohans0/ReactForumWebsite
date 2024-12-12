@@ -1,5 +1,5 @@
 # CSS481FinalProject
-forum website
+forum website<br />
 REQUIRES SPLIT TERMINALS IN VSCODE:
 Run server on one terminal, do npm start on the other
 to run:
