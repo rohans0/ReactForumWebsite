@@ -12,9 +12,6 @@ const Header = () => {
           <li>
             <Link to="/">Home</Link>
           </li>
-					{/*<li>
-            <Link to="/auth">Login</Link>
-          </li>*/}
         </ul>
       </nav>
       <h1>Game Realm</h1>

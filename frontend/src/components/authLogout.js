@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import React from "react";
 
+// button that logs out of auth0 and refreshes
 const AuthLogout = () => {
   const { logout } = useAuth0();
 

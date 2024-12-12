@@ -5,6 +5,7 @@ import AuthLogout from "./authLogout";
 
 import "../styles/Auth0.css";
 
+// user profile, where login/ logout buttons are located
 const AuthProfile = () => {
 	const { user, isAuthenticated, isLoading } = useAuth0();
 

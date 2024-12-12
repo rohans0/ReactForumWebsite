@@ -59,6 +59,7 @@ const HomePage = () => {
     }
   };
 
+	// send post information to database as json
   const handlePostSubmit = async (e) => {
     e.preventDefault();
     console.log(newFile);
@@ -99,6 +100,7 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
+			{/* new post form */}
       <h1>Create a New Post</h1>
       <form onSubmit={handlePostSubmit} className="post-form">
 				<div className="post-profile">
@@ -133,6 +135,8 @@ const HomePage = () => {
         />
         <button type="submit">Create Post</button>
       </form>
+
+			{/* all posts from database */}
       <div className="posts-container">
         <h2>All Posts</h2>
         <div className="posts">
